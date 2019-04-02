@@ -63,7 +63,7 @@ class RedisCache extends CacheProvider
      */
     protected function doFetch($id)
     {
-        return $this->redis->get($id);
+        return gzdeflate($this->redis->get($id));
     }
 
     /**
@@ -75,7 +75,7 @@ class RedisCache extends CacheProvider
         $fetchedItems = $this->redis->mget($keys);
         foreach ($keys as $key) {
             if (isset($fetchedItems[$key])) {
-                $returnValues[$key] = $fetchedItems[$key];
+                $returnValues[$key] = gzinflate($fetchedItems[$key]);
             }
         }
 
@@ -96,10 +96,10 @@ class RedisCache extends CacheProvider
     protected function doSave($id, $data, $lifeTime = 0)
     {
         if ($lifeTime > 0) {
-            return $this->redis->setex($id, $lifeTime, $data);
+            return $this->redis->setex($id, $lifeTime, gzdeflate($data));
         }
 
-        return $this->redis->set($id, $data);
+        return $this->redis->set($id, gzdeflate($data));
     }
 
     /**
